@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createOpenAIClient, streamChatCompletion as streamOpenAI } from '@/lib/ai/openai'
 import { createAnthropicClient, streamChatCompletion as streamAnthropic } from '@/lib/ai/anthropic'
+import { getRelevantContext } from '@/lib/rag/search'
 
 export const runtime = 'edge'
 
@@ -60,7 +61,22 @@ export async function POST(request: NextRequest) {
 
     // Build message history
     const conversationMessages = messages || []
-    const systemPrompt = project?.custom_instructions || ''
+    let systemPrompt = project?.custom_instructions || ''
+
+    // Get relevant context from documents (RAG)
+    let ragContext = ''
+    let relevantChunks: any[] = []
+    try {
+      ragContext = await getRelevantContext(message, projectId, 3)
+      if (ragContext) {
+        systemPrompt = systemPrompt
+          ? `${systemPrompt}\n\n${ragContext}`
+          : ragContext
+      }
+    } catch (error) {
+      console.error('RAG context fetch failed:', error)
+      // Continue without RAG if it fails
+    }
 
     // Create a streaming response
     const encoder = new TextEncoder()

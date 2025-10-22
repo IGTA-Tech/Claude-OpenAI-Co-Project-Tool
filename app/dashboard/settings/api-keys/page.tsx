@@ -121,8 +121,8 @@ export default async function ApiKeysPage() {
         <CardContent>
           <Suspense fallback={<div>Loading...</div>}>
             <ApiKeysList initialKeys={apiKeys} />
-          </CardContent>
-        </Card>
+          </Suspense>
+        </CardContent>
       </Card>
     </div>
   )

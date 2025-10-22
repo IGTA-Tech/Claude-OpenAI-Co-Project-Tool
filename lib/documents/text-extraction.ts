@@ -1,9 +1,10 @@
-import pdf from 'pdf-parse'
+import * as pdfParse from 'pdf-parse'
 import mammoth from 'mammoth'
 
 export async function extractTextFromPDF(buffer: Buffer): Promise<string> {
   try {
-    const data = await pdf(buffer)
+    // @ts-ignore - pdf-parse has complex types
+    const data = await pdfParse(buffer)
     return data.text
   } catch (error) {
     console.error('PDF extraction error:', error)
